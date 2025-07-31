@@ -1,13 +1,9 @@
-﻿namespace CarAuction.Model;
+﻿using CarAuction.Model.BaseEntities;
 
-public record Truck : Vehicle
+namespace CarAuction.Model;
+
+public class Truck : BaseVehicleEntity
 {
     public double LoadCapacity { get; init; }
-
-    public Truck(string manufacturer, string model, int year, decimal startingBid, double loadCapacity)
-        : base(manufacturer, model, year, startingBid)
-    {
-        LoadCapacity = loadCapacity;
-    }
 }
 

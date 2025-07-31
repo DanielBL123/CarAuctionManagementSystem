@@ -1,12 +1,9 @@
-﻿namespace CarAuction.Model;
+﻿using CarAuction.Model.BaseEntities;
 
-public record Sudan : Vehicle
+namespace CarAuction.Model;
+
+public class Sudan : BaseVehicleEntity
 {
     public int NumberOfDoors { get; init; }
 
-    public Sudan(string manufacturer, string model, int year, decimal startingBid, int numberOfDoors)
-        : base(manufacturer, model, year, startingBid)
-    {
-        NumberOfDoors = numberOfDoors;
-    }
 }
