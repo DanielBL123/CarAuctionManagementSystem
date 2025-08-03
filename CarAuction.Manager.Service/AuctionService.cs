@@ -15,8 +15,12 @@ public class AuctionService(IAuctionRepository auctionRepository, IVehicleReposi
         var auction = mapper.Map<Auction>(createAuctionRequest);
 
         var vehicles = GetVehiclesByIdentifierNumbers(createAuctionRequest.VehicleIdentificationNumbers);
+        
         if (!vehicles.Any())
             throw new InvalidOperationException("No vehicles found with the provided identifiers.");
+
+        if (vehicles.Any(x => x.AuctionId != null))
+            throw new InvalidOperationException("There are vehicles that are already associated to other auction.");
 
         await auctionRepository.AddAsync(auction);
         await auctionRepository.SaveChangesAsync();

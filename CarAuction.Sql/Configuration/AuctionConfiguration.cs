@@ -11,6 +11,9 @@ internal class AuctionConfiguration : IEntityTypeConfiguration<Auction>
                .IsRequired()
                .HasMaxLength(100);
 
+        builder.HasIndex(v => v.Name)
+               .IsUnique();
+
         builder.Property(a => a.StartDate)
                .HasColumnType("datetime")
                .IsRequired();

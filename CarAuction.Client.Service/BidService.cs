@@ -18,7 +18,7 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
         ArgumentNullException.ThrowIfNull(user);
 
         var auction = await auctionRepository.AsQueryable(x => x.Name.Equals(request.AuctionName) && x.Status == AuctionStatus.Active).FirstOrDefaultAsync();
-        ArgumentNullException.ThrowIfNull(auction);
+        ArgumentNullException.ThrowIfNull("There is no live auction with the name provided: " + request.AuctionName);
 
         var vehicle = await vehicleRepository.GetLicitingVehicleByIdentificationNumber(request.VehicleUniqueIdentifier);
         ArgumentNullException.ThrowIfNull(vehicle);
