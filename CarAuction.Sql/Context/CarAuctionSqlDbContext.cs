@@ -1,8 +1,4 @@
-﻿using CarAuction.Model;
-using CarAuction.Model.BaseEntities;
-using System.Diagnostics.CodeAnalysis;
-
-namespace CarAuction.Sql.Context
+﻿namespace CarAuction.Sql.Context
 {
     [ExcludeFromCodeCoverage]
     public class CarAuctionSqlDbContext(DbContextOptions<CarAuctionSqlDbContext> options) : DbContext (options)
@@ -13,10 +9,10 @@ namespace CarAuction.Sql.Context
             modelBuilder.ApplyConfigurationsFromAssembly(assembly);
         }
 
-        public DbSet<BaseVehicleEntity> BaseVehicleEntity { get; set; }
-        public DbSet<Hatchback> Hatchback { get; set; }
-        public DbSet<Sudan> Sudan { get; set; }
-        public DbSet<Suv> Suv { get; set; }
-        public DbSet<Truck> Truck { get; set; }
+        public DbSet<Vehicle> Vehicle { get; set; }
+        public DbSet<Auction> Auction { get; set; }
+        public DbSet<User> User { get; set; }
+        public DbSet<Bid> Bid { get; set; }
+
     }
 }

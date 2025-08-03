@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk.Web">
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
 
   <PropertyGroup>
     <TargetFramework>net9.0</TargetFramework>
@@ -7,18 +7,24 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.7" />
     <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="9.0.7" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="8.0.8">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="Microsoft.IdentityModel.Tokens" Version="8.13.0" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerGen" Version="9.0.3" />
     <PackageReference Include="Swashbuckle.AspNetCore.SwaggerUI" Version="9.0.3" />
+    <PackageReference Include="System.IdentityModel.Tokens.Jwt" Version="8.13.0" />
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\CarAuction.Sql\CarAuction.Sql.csproj" />
-    <ProjectReference Include="..\CarAuction.Model\CarAuction.Model.csproj" />
+    <ProjectReference Include="..\CarAuction.Common.Global\CarAuction.Common.Global.csproj" />
+    <ProjectReference Include="..\CarAuction.Dto\CarAuction.Dto.csproj" />
+    <ProjectReference Include="..\CarAuction.Manager.Service\CarAuction.Manager.Service.csproj" />
+    <ProjectReference Include="..\CarAuction.RealTime\CarAuction.RealTime.csproj" />
+    <ProjectReference Include="..\CarAuction.Validation\CarAuction.Validation.csproj" />
   </ItemGroup>
 
 </Project>

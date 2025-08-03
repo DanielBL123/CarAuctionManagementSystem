@@ -1,55 +1,50 @@
-﻿using CarAuction.Model;
-using CarAuction.Sql.Context;
-using Microsoft.AspNetCore.Mvc;
+﻿using CarAuction.Dto;
+
 
 namespace CarAuction.ManagerApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class VehiclesController : ControllerBase
+public class VehiclesController(IVehicleService vehicleService, IMapper mapper) : ControllerBase
 {
-    private readonly CarAuctionSqlDbContext _context;
 
-    public VehiclesController(CarAuctionSqlDbContext context)
-    {
-        _context = context;
-    }
 
     [HttpGet]
-    public IActionResult GetVehicles()
+    public async Task<IActionResult> GetVehicles([FromQuery] List<string>? types,
+                                                 [FromQuery] string? manufacturer,
+                                                 [FromQuery] string? model,
+                                                 [FromQuery] int? year)
     {
-        return Ok(_context.BaseVehicleEntity.ToList());
+        var result = await vehicleService.SearchVehiclesAsync(types, manufacturer, model, year);
+        return Ok(result);
     }
 
     [HttpPost("hatchback")]
-    public IActionResult AddHatchback([FromBody] Hatchback hatchback)
+    public async Task<IActionResult> AddHatchback([FromBody] CreateHatchbackRequest hatchback)
     {
-        _context.Hatchback.Add(hatchback);
-        _context.SaveChanges();
-        return Ok(hatchback);
+        try
+        {
+            return Ok(await vehicleService.AddVehicle(hatchback));
+        }
+        catch (Exception ex)
+        {
+            return BadRequest(ex.Message);
+        }
     }
 
-    [HttpPost("sudan")]
-    public IActionResult AddSedan([FromBody] Sudan sedan)
-    {
-        _context.Sudan.Add(sedan);
-        _context.SaveChanges();
-        return Ok(sedan);
-    }
+    [HttpPost("sedan")]
+    public async Task<IActionResult> AddSedan([FromBody] CreateSedanRequest sedan) =>
+        Ok(await vehicleService.AddVehicle(sedan));
 
     [HttpPost("suv")]
-    public IActionResult AddSUV([FromBody] Suv suv)
-    {
-        _context.Suv.Add(suv);
-        _context.SaveChanges();
-        return Ok(suv);
-    }
+    public async Task<IActionResult> AddSuv([FromBody] CreateSuvRequest suv) =>
+        Ok(await vehicleService.AddVehicle(suv));
+
 
     [HttpPost("truck")]
-    public IActionResult AddTruck([FromBody] Truck truck)
-    {
-        _context.Truck.Add(truck);
-        _context.SaveChanges();
-        return Ok(truck);
-    }
+    public async Task<IActionResult> AddTruck([FromBody] CreateTruckRequest truck) =>
+        Ok(await vehicleService.AddVehicle(truck));
+
+
+
 }
