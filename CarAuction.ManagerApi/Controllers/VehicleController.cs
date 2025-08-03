@@ -6,7 +6,7 @@ namespace CarAuction.ManagerApi.Controllers;
 
 [ApiController]
 [Route("api/[controller]")]
-public class VehiclesController(IVehicleService vehicleService, IMapper mapper) : ControllerBase
+public class VehiclesController(IVehicleService vehicleService) : ControllerBase
 {
 
 

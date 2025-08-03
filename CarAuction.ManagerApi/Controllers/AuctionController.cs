@@ -1,7 +1,7 @@
 ﻿
 [ApiController]
 [Route("api/[controller]")]
-public class AuctionsController(IAuctionService auctionService, IMapper mapper) : ControllerBase
+public class AuctionsController(IAuctionService auctionService) : ControllerBase
 {
 
     [HttpPost("create")]
