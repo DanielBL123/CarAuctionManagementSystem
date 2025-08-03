@@ -30,7 +30,7 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAd
   
     }
 
-    public async Task<IEnumerable<VehicleDto>> SearchVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year)
+    public async Task<IEnumerable<VehicleDto>> GetVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year)
     {
         var query = vehicleRepository.AsQueryable();
 

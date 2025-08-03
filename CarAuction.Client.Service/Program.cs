@@ -23,7 +23,6 @@ services.AddDbContext<CarAuctionSqlDbContext>(options =>
 services.AddLogging();
 services.AddScoped<IUserRepository, UserRepository>();
 services.AddScoped<IBidRepository, BidRepository>();
-services.AddScoped<IAuctionRepository, AuctionRepository>();
 services.AddScoped<IVehicleRepository, VehicleRepository>();
 services.AddScoped<IUserRepository, UserRepository>();
 services.AddScoped<IAuthService, AuthService>();

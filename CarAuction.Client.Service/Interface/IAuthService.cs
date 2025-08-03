@@ -7,4 +7,5 @@ public interface IAuthService
 {
     Task<UserDto?> LoginAsync(LoginUserRequest request);
     Task<UserDto> RegisterAsync(RegisterUserRequest request);
+    Task<IEnumerable<VehicleDto>> GetVehicles(string username);
 }

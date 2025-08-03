@@ -8,7 +8,7 @@ using CarAuction.Sql.Repositories.Interfaces;
 using Microsoft.EntityFrameworkCore;
 
 namespace CarAuction.Client.Service;
-public class AuthService(IUserRepository userRepository, IAuctionRepository auctionRepository, IVehicleRepository vehicleRepository, IMapper mapper) : IAuthService
+public class AuthService(IUserRepository userRepository, IVehicleRepository vehicleRepository, IMapper mapper) : IAuthService
 {
     public async Task<UserDto?> LoginAsync(LoginUserRequest request)
     {
@@ -38,5 +38,14 @@ public class AuthService(IUserRepository userRepository, IAuctionRepository auct
 
         return mapper.Map<UserDto>(user);
     }
+
+    public async Task<IEnumerable<VehicleDto>> GetVehicles(string username)
+    {
+        var user = await userRepository.GetByUsernameAsync(username);
+        ArgumentNullException.ThrowIfNull(user);
+
+        return await Task.Run(() => mapper.Map<IEnumerable<VehicleDto>>(vehicleRepository.AsQueryable(x => x.UserId == user.Id)));
+    }
+
 }
 

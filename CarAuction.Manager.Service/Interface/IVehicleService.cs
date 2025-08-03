@@ -5,7 +5,7 @@ namespace CarAuction.Manager.Service.Interface;
 
 public interface IVehicleService
 {
-    Task<IEnumerable<VehicleDto>> SearchVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year);
+    Task<IEnumerable<VehicleDto>> GetVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year);
 
     Task<CreateVehicleRequest> AddVehicle(CreateVehicleRequest vehicle);
 

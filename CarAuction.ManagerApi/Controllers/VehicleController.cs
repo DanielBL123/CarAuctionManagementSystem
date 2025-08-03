@@ -16,7 +16,7 @@ public class VehiclesController(IVehicleService vehicleService, IMapper mapper) 
                                                  [FromQuery] string? model,
                                                  [FromQuery] int? year)
     {
-        var result = await vehicleService.SearchVehiclesAsync(types, manufacturer, model, year);
+        var result = await vehicleService.GetVehiclesAsync(types, manufacturer, model, year);
         return Ok(result);
     }
 

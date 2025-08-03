@@ -1,6 +1,7 @@
 ﻿using CarAuction.Client.Service.Handler;
 using CarAuction.Client.Service.Interface;
 using CarAuction.Dto.Request;
+using CarAuction.Sql.Repositories.Interfaces;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Hosting;
 
@@ -8,6 +9,8 @@ namespace CarAuction.Client.Service;
 
 public class ClientService(IAuthService authService) : BackgroundService
 {
+
+    #region Simulate notifications
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
     {
         try
@@ -71,6 +74,7 @@ public class ClientService(IAuthService authService) : BackgroundService
 
         return IsLogged;
     }
+    #endregion
     #endregion
 
 }
