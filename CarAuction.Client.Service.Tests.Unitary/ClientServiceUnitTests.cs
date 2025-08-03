@@ -1,5 +1,4 @@
-﻿using CarAuction.Client.Service.Interface;
-using CarAuction.Client.Service.Settings;
+﻿using CarAuction.Client.Service.Settings;
 using CarAuction.Common.Tests.Unitary;
 using CarAuction.Common.Tests.Unitary.Extensions;
 using CarAuction.Dto;
@@ -9,7 +8,7 @@ using Microsoft.Extensions.Logging;
 using Microsoft.Extensions.Options;
 using NSubstitute;
 
-namespace CarAuction.Client.Service.UnitTests;
+namespace CarAuction.Client.Service.Tests.Unitary;
 
 public class ClientServiceUnitTests : BaseServiceTests<ClientService>
 {

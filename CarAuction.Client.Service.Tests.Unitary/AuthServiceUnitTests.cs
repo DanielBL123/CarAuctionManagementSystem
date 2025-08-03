@@ -4,12 +4,11 @@ using CarAuction.Common.Tests.Unitary.Extensions;
 using CarAuction.Dto;
 using CarAuction.Dto.Request;
 using CarAuction.Model;
-using CarAuction.Sql.Repositories.Interfaces;
 using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Linq.Expressions;
 
-namespace CarAuction.Client.Service.UnitTests;
+namespace CarAuction.Client.Service.Tests.Unitary;
 
 public class AuthServiceUnitTests : BaseServiceTests<AuthService>
 {

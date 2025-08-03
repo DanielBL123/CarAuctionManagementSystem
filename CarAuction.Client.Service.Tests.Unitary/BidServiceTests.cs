@@ -1,5 +1,4 @@
 ﻿using AutoMapper;
-using CarAuction.Client.Service.Interface;
 using CarAuction.Common.Global.Enum;
 using CarAuction.Common.Tests.Unitary;
 using CarAuction.Common.Tests.Unitary.Extensions;
@@ -11,7 +10,7 @@ using Microsoft.Extensions.DependencyInjection;
 using NSubstitute;
 using System.Linq.Expressions;
 
-namespace CarAuction.Client.Service.UnitTests;
+namespace CarAuction.Client.Service.Tests.Unitary;
 
 public class BidServiceTests : BaseServiceTests<BidService>
 {
