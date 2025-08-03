@@ -1,6 +1,5 @@
 ﻿using CarAuction.Common.Global.Extensions;
 using CarAuction.Common.MappingProfiles;
-using CarAuction.Manager.Service;
 using CarAuction.Manager.Service.Adapter;
 using CarAuction.RealTime;
 using CarAuction.RealTime.Interface;

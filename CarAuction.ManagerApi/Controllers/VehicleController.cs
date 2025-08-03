@@ -1,4 +1,5 @@
-﻿using CarAuction.Dto;
+﻿using CarAuction.Common.Global.Enum;
+using CarAuction.Dto;
 
 
 namespace CarAuction.ManagerApi.Controllers;
@@ -10,7 +11,7 @@ public class VehiclesController(IVehicleService vehicleService, IMapper mapper) 
 
 
     [HttpGet]
-    public async Task<IActionResult> GetVehicles([FromQuery] List<string>? types,
+    public async Task<IActionResult> GetVehicles([FromQuery] List<VehicleType>? types,
                                                  [FromQuery] string? manufacturer,
                                                  [FromQuery] string? model,
                                                  [FromQuery] int? year)

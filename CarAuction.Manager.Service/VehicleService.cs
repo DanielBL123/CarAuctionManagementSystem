@@ -1,7 +1,9 @@
 ﻿using AutoMapper;
+using CarAuction.Common.Global.Enum;
 using CarAuction.Dto.Request;
 using CarAuction.Manager.Service.Adapter;
 using CarAuction.Model;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarAuction.Manager.Service;
 
@@ -25,37 +27,28 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAd
         }
 
         throw new InvalidOperationException(string.Join(",", Errors.ToArray()));
-
-        
+  
     }
 
-    public Task<IEnumerable<VehicleDto>> SearchVehiclesAsync(IEnumerable<string>? types, string? manufacturer, string? model, int? year)
+    public async Task<IEnumerable<VehicleDto>> SearchVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year)
     {
-        return null;
+        var query = vehicleRepository.AsQueryable();
+
+        if (types != null && types.Any())
+            query = query.Where(v => types.Contains(v.VehicleType));
+
+        if (!string.IsNullOrWhiteSpace(manufacturer))
+            query = query.Where(v => v.Manufacturer.Contains(manufacturer));
+
+        if (!string.IsNullOrWhiteSpace(model))
+            query = query.Where(v => v.Model.Contains(model));
+
+        if (year.HasValue)
+            query = query.Where(v => v.Year == year.Value);
+
+        var vehicles = await query.ToListAsync();
+
+        return mapper.Map<IEnumerable<VehicleDto>>(vehicles);
     }
-
-    //public Task<HatchbackDto> AddHatchbackAsync(HatchbackDto dto) =>
-    //    AddVehicleAsync<HatchbackDto, Hatchback>(dto, hatchbackRepository.AddAsync, vehicleRepository.SaveChangesAsync);
-
-    //public Task<SedanDto> AddSedanAsync(SedanDto dto) =>
-    //    AddVehicleAsync<SedanDto, Sedan>(dto, sedanRepository.AddAsync, sedanRepository.SaveChangesAsync);
-
-    //public Task<SuvDto> AddSuvAsync(SuvDto dto) =>
-    //    AddVehicleAsync<SuvDto, Suv>(dto, suvRepository.AddAsync, suvRepository.SaveChangesAsync);
-
-    //public Task<TruckDto> AddTruckAsync(TruckDto dto) =>
-    //    AddVehicleAsync<TruckDto, Truck>(dto, truckRepository.AddAsync, truckRepository.SaveChangesAsync);
-
-
-    //private async Task<TDto> AddVehicleAsync<TDto, TEntity>(TDto dto, Func<TEntity, Task> addFunc, Func<Task> saveChangesFunc) where TEntity : Vehicle
-    //{
-    //    var entity = mapper.Map<TEntity>(dto);
-    //    ArgumentNullException.ThrowIfNull(entity);
-
-    //    await addFunc(entity);
-    //    await saveChangesFunc();
-
-    //    return dto;
-    //}
 
 }
