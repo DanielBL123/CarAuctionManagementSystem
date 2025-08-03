@@ -1,0 +1,10 @@
+﻿global using AutoMapper;
+global using CarAuction.Client.Service.Interface;
+global using CarAuction.Dto;
+global using CarAuction.Dto.Request;
+global using CarAuction.Model;
+global using CarAuction.Sql.Repositories.Interfaces;
+global using Microsoft.Extensions.Logging;
+global using Microsoft.EntityFrameworkCore;
+global using CarAuction.Client.Service.Settings;
+global using Microsoft.Extensions.Hosting;

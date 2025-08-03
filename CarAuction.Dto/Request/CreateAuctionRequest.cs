@@ -4,6 +4,6 @@ public record CreateAuctionRequest
 (
     string Name,
     DateTime StartDate,
-    DateTime EndDate,
+    DateTime? EndDate,
     IEnumerable<string> VehicleIdentificationNumbers
 );

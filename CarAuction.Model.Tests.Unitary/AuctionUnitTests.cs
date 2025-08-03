@@ -1,9 +1,9 @@
 ﻿using CarAuction.Common.Global.Enum;
-using CarAuction.Common.UnitTests;
+using CarAuction.Common.Tests.Unitary;
 
-namespace CarAuction.Model.UnitTests;
+namespace CarAuction.Model.Tests.Unitary;
 
-public class AuctionTests
+public class AuctionTests : BaseServiceTests<AuctionTests>
 {
     
     [Fact]
@@ -41,7 +41,7 @@ public class AuctionTests
     public void VehiclesCollection_ShouldAllowAddAndRemove()
     {
         var auction = new Auction();
-        var vehicle = MockData.MockVehicles().First();
+        var vehicle = MockVehicles().First();
     
         auction.Vehicles.Add(vehicle);
         Assert.Single(auction.Vehicles);
@@ -66,7 +66,7 @@ public class AuctionTests
     [Fact]
     public void MockAuctions_ShouldReturnValidData()
     {
-        var auctions = MockData.MockAuctions();
+        var auctions = MockAuctions();
     
         Assert.Equal(2, auctions.Count);
         Assert.Equal("TestAuction1", auctions[0].Name);

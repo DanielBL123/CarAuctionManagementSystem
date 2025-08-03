@@ -1,164 +1,124 @@
-﻿//using CarAuction.Client.Service.Interface;
-//using CarAuction.Common.UnitTests;
-//using CarAuction.Dto.Request;
-//using CarAuction.Model;
-//using NSubstitute;
-//using NSubstitute.Core;
-//using NSubstitute.ExceptionExtensions;
+﻿using CarAuction.Client.Service.Interface;
+using CarAuction.Client.Service.Settings;
+using CarAuction.Common.Tests.Unitary;
+using CarAuction.Common.Tests.Unitary.Extensions;
+using CarAuction.Dto;
+using CarAuction.Dto.Request;
+using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Options;
+using NSubstitute;
 
-//namespace CarAuction.Client.Service.UnitTests;
+namespace CarAuction.Client.Service.UnitTests;
 
-//public class ClientServiceUnitTests
-//{
-//    private readonly IAuthService _authService;
+public class ClientServiceUnitTests : BaseServiceTests<ClientService>
+{
 
-//    public ClientServiceUnitTests()
-//    {
+    private readonly IOptions<AuctionNotificationSettings> optionsStub;
+    private readonly ClientService clientService;
 
-//        _authService = <IAuthService>();
-//    }
+    public ClientServiceUnitTests()
+    {
 
-//    private ClientService CreateService()
-//    {
-//        return new ClientService(_authService);
-//    }
+        optionsStub = serviceCollection.AddSubstituteFor<IOptions<AuctionNotificationSettings>>();
+        optionsStub.Value.Returns(GetMockAuctionNotificationSettings);
 
-//    private static void SimulateConsoleInput(params string[] inputs)
-//    {
-//        var inputString = string.Join(Environment.NewLine, inputs);
-//        Console.SetIn(new StringReader(inputString));
-//        Console.SetOut(new StringWriter());
-//    }
+        serviceCollection.AddTransient<ClientService>();
+        clientService = serviceCollection.BuildServiceProvider().GetRequiredService<ClientService>();
+        
+    }
 
-//    private static async Task<bool> InvokeLogin(ClientService service)
-//    {
-//        var method = typeof(ClientService)
-//            .GetMethod("Login", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
-
-//        return await (Task<bool>)method.Invoke(service, null);
-//    }
+    private static AuctionNotificationSettings GetMockAuctionNotificationSettings => new()
+    {
+        HubUrl = "http://localhost/hub",
+        RetryCount = 1,
+        RetryDelaySeconds = 1
+    };
 
 
-//    [Fact]
-//    public async Task Login_ShouldReturnTrue_WhenUserExists()
-//    {
+    [Fact]
+    public async Task StopAsync_Should_Log_Stop_Message()
+    {
+        await clientService.StopAsync(CancellationToken.None);
 
-//        var user = MockData.MockUsers()[0];
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>()).Returns(user);
+        loggerStub.Received(1).Log(LogLevel.Debug, Arg.Any<EventId>(),Arg.Is<object>(o => o.ToString().Contains("Closing service")), null, Arg.Any<Func<object, Exception?, string>>());
+    }
 
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password");
+    [Fact]
+    public async Task ExecuteAsync_Should_Login_And_Connect_WhenUserExists()
+    {
+        // Arrange
 
-//        // Act
-//        var result = await InvokeLogin(service);
+        using var input = new StringReader("user\npass\n");
+        using var output = new StringWriter();
+        Console.SetIn(input);
+        Console.SetOut(output);
 
-//        // Assert
-//        Assert.True(result);
-//    }
+        authServiceStub.LoginAsync(Arg.Any<LoginUserRequest>())
+            .Returns(Task.FromResult(new UserDto(1, "user")));
 
-//    [Fact]
-//    public async Task Login_ShouldRegister_WhenLoginFails_AndUserChoosesYes()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Returns(Task.FromResult<User>(null));
-//        _authService.RegisterAsync(Arg.Any<RegisterUserRequest>())
-//                    .Returns(Task.FromResult(GetTestUser()));
+        optionsStub.Value.RetryCount = 1;
+        var tokenSource = new CancellationTokenSource();
 
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password", "y");
+        // Act
+        await clientService.StartAsync(tokenSource.Token);
 
-//        // Act
-//        var result = await InvokeLogin(service);
+        // Assert
+        await authServiceStub.Received(1).LoginAsync(Arg.Any<LoginUserRequest>());
 
-//        // Assert
-//        Assert.True(result);
-//    }
-
-//    [Fact]
-//    public async Task Login_ShouldReturnFalse_WhenRegistrationThrowsException()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Returns(Task.FromResult<User>(null));
-//        _authService.RegisterAsync(Arg.Any<RegisterUserRequest>())
-//                    .Throws(new InvalidOperationException("Registration failed"));
-
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password", "y");
-
-//        // Act
-//        var result = await InvokeLogin(service);
-
-//        // Assert
-//        Assert.False(result);
-//    }
-
-//    [Fact]
-//    public async Task Login_ShouldReturnFalse_WhenLoginFails_AndUserChoosesNo()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Returns(Task.FromResult<User>(null));
-
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password", "n");
-
-//        // Act
-//        var result = await InvokeLogin(service);
-
-//        // Assert
-//        Assert.False(result);
-//    }
+    }
 
 
-//    [Fact]
-//    public async Task ExecuteAsync_ShouldCallRegisterEvents_WhenLoginSucceeds()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Returns(Task.FromResult(GetTestUser()));
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password");
+    [Fact]
+    public async Task ExecuteAsync_Should_Register_IfUserNotExists_And_ChooseToRegister()
+    {
 
-//        // Act
-//        await service.StartAsync(CancellationToken.None);
-//        await Task.Delay(100);
+        using var input = new StringReader("user\npass\ny\n");
+        using var output = new StringWriter();
+        Console.SetIn(input);
+        Console.SetOut(output);
 
-//    }
+        authServiceStub.LoginAsync(Arg.Any<LoginUserRequest>())
+            .Returns(
+                Task.FromResult<UserDto>(null!),
+                Task.FromResult(new UserDto(1, "user"))
+            );
+        authServiceStub.RegisterAsync(Arg.Any<RegisterUserRequest>())
+            .Returns(Task.FromResult(new UserDto(1, "user")));
 
-//    [Fact]
-//    public async Task ExecuteAsync_ShouldNotThrow_WhenLoginFails()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Returns(Task.FromResult<User>(null));
+        optionsStub.Value.RetryCount = 1;
 
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password", "n");
+        var tokenSource = new CancellationTokenSource();
 
-//        // Act
-//        await service.StartAsync(CancellationToken.None);
-//        await Task.Delay(100);
+        // Act
+        await clientService.StartAsync(tokenSource.Token);
 
-//        // Assert: No exception expected
-//    }
+        loggerStub.Received().Log(LogLevel.Information, Arg.Any<EventId>(), Arg.Is<object>(o => o!.ToString()!.Contains($"The user user doesn't exists")), null, Arg.Any<Func<object, Exception?, string>>());
 
-//    [Fact]
-//    public async Task ExecuteAsync_ShouldCatchException()
-//    {
-//        // Arrange
-//        _authService.LoginAsync(Arg.Any<LoginUserRequest>())
-//                    .Throws(new Exception("Simulated exception"));
+        loggerStub.Received().Log(LogLevel.Information, Arg.Any<EventId>(), Arg.Is<object>(o => o!.ToString()!.Contains("was sucessfully registered in the database")), null, Arg.Any<Func<object, Exception?, string>>());
 
-//        var service = CreateService();
-//        SimulateConsoleInput("username", "password");
+        loggerStub.ReceivedWithAnyArgs().LogError(default, default, default, default(Exception), default(Func<object, Exception, string>));
+    }
 
-//        // Act
-//        await service.StartAsync(CancellationToken.None);
-//        await Task.Delay(100);
 
-//        // Assert: Exception is caught → no crash
-//    }
-//}
+    [Fact]
+    public async Task ExecuteAsync_Should_Cancel_IfTokenCancelledImmediately()
+    {
+
+        using var input = new StringReader("user\npass\n");
+        using var output = new StringWriter();
+        Console.SetIn(input);
+        Console.SetOut(output);
+
+        authServiceStub.LoginAsync(Arg.Any<LoginUserRequest>())
+            .Returns(Task.FromResult(new UserDto(1, "user")));
+
+        var tokenSource = new CancellationTokenSource();
+        tokenSource.Cancel();
+
+        await clientService.StartAsync(tokenSource.Token);
+
+        await authServiceStub.DidNotReceiveWithAnyArgs().RegisterAsync(default!);
+    }
+
+}

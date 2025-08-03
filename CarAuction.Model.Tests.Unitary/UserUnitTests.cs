@@ -1,8 +1,8 @@
-﻿using CarAuction.Common.UnitTests;
+﻿using CarAuction.Common.Tests.Unitary;
 
-namespace CarAuction.Model.UnitTests;
+namespace CarAuction.Model.Tests.Unitary;
 
-public class UserUnitTests
+public class UserUnitTests : BaseServiceTests<UserUnitTests>
 {
     [Fact]
     public void Constructor_ShouldInitializeCollections()
@@ -59,7 +59,7 @@ public class UserUnitTests
     [Fact]
     public void MockUsers_ShouldReturnValidData()
     {
-        var users = MockData.MockUsers();
+        var users = MockUsers();
 
         Assert.Equal(2, users.Count);
         Assert.Equal("Test1", users[0].Username);

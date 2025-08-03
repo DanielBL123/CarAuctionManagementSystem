@@ -1,39 +1,31 @@
-﻿using AutoMapper;
-using CarAuction.Client.Service.Interface;
-using CarAuction.Common.Global.Enum;
-using CarAuction.Dto;
-using CarAuction.Dto.Request;
-using CarAuction.Model;
+﻿using CarAuction.Common.Global.Enum;
 using CarAuction.RealTime.Interface;
-using CarAuction.Sql.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
 
 namespace CarAuction.Client.Service;
 
-public class BidService(IUserRepository userRepository, IAuctionRepository auctionRepository, IVehicleRepository vehicleRepository, IBidRepository bidRepository, IBidNotifier bidNotifier, IMapper mapper) : IBidService
+public class BidService(IUserRepository userRepository, IAuctionRepository auctionRepository, IVehicleRepository vehicleRepository, IBidRepository bidRepository, IBidNotifier bidNotifier, IMapper mapper, ILogger<BidService> logger) : IBidService
 {
     public async Task PlaceBid(CreateBidRequest request, string username)
     {
-        var user = await userRepository.GetByUsernameAsync(username);
-        ArgumentNullException.ThrowIfNull(user);
+        logger.LogInformation("Submitting a new bid from {Username}", username);
 
-        var auction = await auctionRepository.AsQueryable(x => x.Name.Equals(request.AuctionName) && x.Status == AuctionStatus.Active).FirstOrDefaultAsync();
-        ArgumentNullException.ThrowIfNull("There is no live auction with the name provided: " + request.AuctionName);
+        var user = await GetUserOrThrow(username);
+        var auction = await GetAuctionOrThrow(request.AuctionName);
+        var vehicle = await GetVehicleOrThrow(request.VehicleUniqueIdentifier);
 
-        var vehicle = await vehicleRepository.GetLicitingVehicleByIdentificationNumber(request.VehicleUniqueIdentifier);
-        ArgumentNullException.ThrowIfNull(vehicle);
-
-
-        var lastBid = await bidRepository.AsQueryable(x => x.UserId == user!.Id! &&
-                                                        x.VehicleId == vehicle!.Id! &&
-                                                            x.AuctionId == auction!.Id)
-                                    .OrderByDescending(x => x.Amount)
-                                    .FirstOrDefaultAsync();
+        var lastBid = bidRepository.AsQueryable(b =>
+                            b.UserId == user.Id &&
+                            b.VehicleId == vehicle.Id &&
+                            b.AuctionId == auction.Id)
+                        .OrderByDescending(b => b.Amount)
+                        .FirstOrDefault();
 
         var currentAmmout = lastBid?.Amount ?? vehicle.StartingBid;
 
         if (request.Amount < currentAmmout)
         {
+            logger.LogWarning("The bid placed by {username} for: Auction {request.AuctionName} - Ammount {request.Amount}", username, request.AuctionName, request.Amount);
+
             throw new InvalidOperationException("Your bid is lower than the current highest bid. Please submit a higher amount.");
         }
 
@@ -51,5 +43,21 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
 
         await bidNotifier.NotifyBidPlacedAsync(bidDto);
 
+        logger.LogInformation("The bid placed by {username} for: Auction {request.AuctionName} - Ammount {request.Amount} was accepted", username, request.AuctionName, request.Amount);
+
     }
+
+    private async Task<User> GetUserOrThrow(string username)
+    => await userRepository.GetByUsernameAsync(username)
+       ?? throw new InvalidOperationException($"User '{username}' not found.");
+
+    private async Task<Auction> GetAuctionOrThrow(string name)
+        => await Task.Run(() => auctionRepository.AsQueryable(a => a.Name == name && a.Status == AuctionStatus.Active)
+               .FirstOrDefault())
+           ?? throw new InvalidOperationException($"No active auction found with name '{name}'.");
+
+    private async Task<Vehicle> GetVehicleOrThrow(string identifier)
+        => await vehicleRepository.GetLicitingVehicleByIdentificationNumber(identifier)
+           ?? throw new InvalidOperationException($"Vehicle with identifier '{identifier}' not found.");
+
 }

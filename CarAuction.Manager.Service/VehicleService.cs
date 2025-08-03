@@ -46,9 +46,7 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAd
         if (year.HasValue)
             query = query.Where(v => v.Year == year.Value);
 
-        var vehicles = await query.ToListAsync();
-
-        return mapper.Map<IEnumerable<VehicleDto>>(vehicles);
+        return await Task.Run(() => mapper.Map<IEnumerable<VehicleDto>>(query.ToList()));
     }
 
 }

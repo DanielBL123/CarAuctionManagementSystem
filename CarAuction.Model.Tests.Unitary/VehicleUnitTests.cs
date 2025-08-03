@@ -1,10 +1,9 @@
 ﻿using CarAuction.Common.Global.Enum;
-using CarAuction.Common.UnitTests;
-using CarAuction.Model;
+using CarAuction.Common.Tests.Unitary;
 
-namespace CarAuction.Tests.Model;
+namespace CarAuction.Model.Tests.Unitary;
 
-public class VehicleTests
+public class VehicleTests : BaseServiceTests<VehicleTests>
 {
     [Fact]
     public void Constructor_ShouldInitializeDefaults()
@@ -82,7 +81,7 @@ public class VehicleTests
     public void MockVehicles_ShouldReturnValidData()
     {
         // Arrange
-        var vehicles = MockData.MockVehicles();
+        var vehicles = MockVehicles();
 
         // Assert
         Assert.Equal(3, vehicles.Count);

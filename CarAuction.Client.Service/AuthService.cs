@@ -1,13 +1,4 @@
-﻿using AutoMapper;
-using CarAuction.Client.Service.Interface;
-using CarAuction.Common.Global.Enum;
-using CarAuction.Dto;
-using CarAuction.Dto.Request;
-using CarAuction.Model;
-using CarAuction.Sql.Repositories.Interfaces;
-using Microsoft.EntityFrameworkCore;
-
-namespace CarAuction.Client.Service;
+﻿namespace CarAuction.Client.Service;
 public class AuthService(IUserRepository userRepository, IVehicleRepository vehicleRepository, IMapper mapper) : IAuthService
 {
     public async Task<UserDto?> LoginAsync(LoginUserRequest request)

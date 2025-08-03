@@ -15,7 +15,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\CarAuction.Common.UnitTests\CarAuction.Common.UnitTests.csproj" />
+    <ProjectReference Include="..\CarAuction.Common.Tests.Unitary\CarAuction.Common.Tests.Unitary.csproj" />
   </ItemGroup>
 
   <ItemGroup>

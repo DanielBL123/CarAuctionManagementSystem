@@ -1,8 +1,8 @@
-﻿using CarAuction.Common.UnitTests;
+﻿using CarAuction.Common.Tests.Unitary;
 
-namespace CarAuction.Model.UnitTests;
+namespace CarAuction.Model.Tests.Unitary;
 
-public class BidUnitTests
+public class BidUnitTests : BaseServiceTests<BidUnitTests>
 {
     [Fact]
     public void Constructor_ShouldSetDefaultTimestamp()
@@ -43,7 +43,7 @@ public class BidUnitTests
     [Fact]
     public void MockBids_ShouldReturnValidData()
     {
-        var bids = MockData.MockBids();
+        var bids = MockBids();
 
         Assert.Single(bids);
         var bid = bids[0];

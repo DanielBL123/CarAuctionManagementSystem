@@ -9,6 +9,7 @@
 
   <ItemGroup>
     <PackageReference Include="coverlet.collector" Version="6.0.2" />
+    <PackageReference Include="Microsoft.Extensions.Logging" Version="9.0.7" />
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="17.12.0" />
     <PackageReference Include="NSubstitute" Version="5.3.0" />
     <PackageReference Include="xunit" Version="2.9.2" />
@@ -17,7 +18,8 @@
 
   <ItemGroup>
     <ProjectReference Include="..\CarAuction.Client.Service\CarAuction.Client.Service.csproj" />
-    <ProjectReference Include="..\CarAuction.Common.Tests.Unitary\CarAuction.Common.Tests.Unitary.csproj" />
+    <ProjectReference Include="..\CarAuction.Manager.Service\CarAuction.Manager.Service.csproj" />
+    <ProjectReference Include="..\CarAuction.Model\CarAuction.Model.csproj" />
   </ItemGroup>
 
   <ItemGroup>
