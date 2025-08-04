@@ -159,7 +159,7 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         // Arrange
         var auctions = new List<Auction> { new() { Id = 1, Name = "LeilaoTeste", Vehicles = new List<Vehicle>() } };
         auctionRepositoryStub.GetAllActiveAuctions().Returns(auctions.AsQueryable());
-        mapperStub.Map<IEnumerable<AuctionDto>>(Arg.Any<IQueryable<Auction>>())
+        mapperStub.Map<IEnumerable<AuctionDto>>(Arg.Any<List<Auction>>())
             .Returns([new AuctionDto { Id = 1, Name = "LeilaoTeste" }]);
 
         // Act

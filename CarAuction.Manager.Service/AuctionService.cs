@@ -149,9 +149,9 @@ public class AuctionService(
     }
 
     public async Task<IEnumerable<AuctionDto>> GetActiveAuctions() =>
-        mapper.Map<IEnumerable<AuctionDto>>(
-            await auctionRepository.GetAllActiveAuctions()
+        await Task.Run(() => mapper.Map<IEnumerable<AuctionDto>>(
+            auctionRepository.GetAllActiveAuctions()
             .Include(x => x.Vehicles)
-            .ToListAsync());
+            .ToList()));
 }
 
