@@ -21,11 +21,16 @@ builder.Services.AddDbContext<CarAuctionSqlDbContext>(options =>
     options.UseMySql(builder.Configuration.GetConnectionString("DefaultConnection"),
     new MySqlServerVersion(new Version(8, 0, 36))));
 
+builder.Services.AddMediatR(cfg =>
+{
+    cfg.RegisterServicesFromAssembly(typeof(AuctionService).Assembly);
+});
+
 builder.Services.AddScoped<IAuctionRepository, AuctionRepository>();
 builder.Services.AddScoped<IVehicleRepository, VehicleRepository>();
 builder.Services.AddScoped<IBidRepository, BidRepository>();
 builder.Services.AddScoped<IVehicleService, VehicleService>();
-builder.Services.AddScoped<IAuctionService, AuctionService>();
+builder.Services.AddScoped<IAuctionService, AuctionServiceFinalVersion>();
 builder.Services.AddVehicleValidation();
 builder.Services.RegisterAllByAssembly<IVehicleTypeAdapter>()
                     .AddTransient<IVehicleTypeAdapterFactory, VehicleTypeAdapterFactory>();

@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 namespace CarAuction.Sql.Migrations
 {
     /// <inheritdoc />
-    public partial class db : Migration
+    public partial class dbchanges : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -62,6 +62,7 @@ namespace CarAuction.Sql.Migrations
                     UserId = table.Column<int>(type: "int", nullable: true),
                     NumberOfDoors = table.Column<int>(type: "int", nullable: true),
                     NumberOfSeats = table.Column<int>(type: "int", nullable: true),
+                    CurrentBidAmount = table.Column<int>(type: "int", nullable: true),
                     LoadCapacity = table.Column<double>(type: "double", nullable: true),
                     IsSold = table.Column<bool>(type: "tinyint(1)", nullable: false),
                     Manufacturer = table.Column<string>(type: "varchar(100)", maxLength: 100, nullable: false)
@@ -128,6 +129,12 @@ namespace CarAuction.Sql.Migrations
                 .Annotation("MySql:CharSet", "utf8mb4");
 
             migrationBuilder.CreateIndex(
+                name: "IX_Auction_Name",
+                table: "Auction",
+                column: "Name",
+                unique: true);
+
+            migrationBuilder.CreateIndex(
                 name: "IX_Bid_AuctionId",
                 table: "Bid",
                 column: "AuctionId");
@@ -141,6 +148,12 @@ namespace CarAuction.Sql.Migrations
                 name: "IX_Bid_VehicleId",
                 table: "Bid",
                 column: "VehicleId");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_User_Username",
+                table: "User",
+                column: "Username",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Vehicle_AuctionId",

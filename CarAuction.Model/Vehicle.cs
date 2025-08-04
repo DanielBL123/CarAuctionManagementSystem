@@ -12,6 +12,7 @@ public class Vehicle : IEntity<int>
     public int? UserId { get; set; }
     public int? NumberOfDoors { get; set; }
     public int? NumberOfSeats { get; set; }
+    public int? CurrentBidAmount { get; set; }
     public double? LoadCapacity { get; set; }
     public bool IsSold { get; set; }
     public string Manufacturer { get; set; } = null!;

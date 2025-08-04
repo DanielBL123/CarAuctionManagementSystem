@@ -1,4 +1,5 @@
 ﻿using CarAuction.Common.Global.Enum;
+using CarAuction.Model;
 using CarAuction.RealTime.Interface;
 
 namespace CarAuction.Client.Service;
@@ -13,19 +14,10 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
         var auction = await GetAuctionOrThrow(request.AuctionName);
         var vehicle = auction.Vehicles.Where(x => x.VehicleAction == VehicleAction.Liciting).First();
 
-        var lastBid = bidRepository.AsQueryable(b =>
-                            b.VehicleId == vehicle.Id &&
-                            b.AuctionId == auction.Id)
-                        .OrderByDescending(b => b.Amount)
-                        .FirstOrDefault();
-
-        var currentAmmout = lastBid?.Amount ?? vehicle.StartingBid;
-
-        if (request.Amount < currentAmmout)
+        if (vehicle.CurrentBidAmount.HasValue && request.Amount <= vehicle.CurrentBidAmount.Value)
         {
-            logger.LogWarning("The bid placed by {username} for: Auction {AuctionName} - Ammount {request.Amount}. Current Amount: {Amount}", username, request.AuctionName, request.Amount, lastBid!.Amount);
-
-            throw new InvalidOperationException("Your bid is lower than the current highest bid. Please submit a higher amount.");
+            logger.LogWarning("The bid placed by {username} for: Auction {AuctionName} - Ammount {request.Amount}. Current Amount: {Amount}", username, request.AuctionName, request.Amount, vehicle.CurrentBidAmount);
+            throw new InvalidOperationException("Bid must be higher than current bid amount.");
         }
 
         var bidDto = new BidDto()
@@ -38,7 +30,12 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
         };
 
         await bidRepository.AddAsync(mapper.Map<Bid>(bidDto));
+
+        vehicle.CurrentBidAmount = request.Amount;
+        vehicleRepository.Update(vehicle);
+
         await bidRepository.SaveChangesAsync();
+        await vehicleRepository.SaveChangesAsync();
 
         await bidNotifier.NotifyBidPlacedAsync(bidDto);
 
@@ -53,6 +50,7 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
     private async Task<Auction> GetAuctionOrThrow(string name)
         => await Task.Run(() => auctionRepository.AsQueryable(a => a.Name == name && a.Status == AuctionStatus.Active)
                                     .Include(x => x.Vehicles)
+                                    .AsNoTracking()
                                     .FirstOrDefault())
            ?? throw new InvalidOperationException($"No active auction found with name '{name}'.");
 

@@ -31,6 +31,7 @@
 
             protected bool CheckIfIndentificationNumberAlreadyExists(string identificationNumber) =>
                 _vehicleRepository.AsQueryable(x => 
-                    x.IdentificationNumber.ToLower().Equals(identificationNumber.ToLower())).Any();
+                    x.IdentificationNumber.ToLower().Equals(identificationNumber.ToLower()))
+                    .Any();
         }
     }

@@ -33,6 +33,8 @@ public class VehicleConfiguration : IEntityTypeConfiguration<Vehicle>
         builder.Property(v => v.VehicleAction)
                .IsRequired();
 
+        builder.Property(v => v.CurrentBidAmount);
+
         builder.HasMany(v => v.Bids)
                .WithOne(b => b.Vehicle)
                .HasForeignKey(b => b.VehicleId)

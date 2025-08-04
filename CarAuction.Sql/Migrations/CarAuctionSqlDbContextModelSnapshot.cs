@@ -46,6 +46,9 @@ namespace CarAuction.Sql.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Name")
+                        .IsUnique();
+
                     b.ToTable("Auction");
                 });
 
@@ -103,6 +106,9 @@ namespace CarAuction.Sql.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("User");
                 });
 
@@ -115,6 +121,9 @@ namespace CarAuction.Sql.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AuctionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CurrentBidAmount")
                         .HasColumnType("int");
 
                     b.Property<string>("IdentificationNumber")

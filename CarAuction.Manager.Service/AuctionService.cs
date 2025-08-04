@@ -60,6 +60,7 @@ public class AuctionService(
         var auction = await auctionRepository
             .AsQueryable(a => a.Id == auctionId)
             .Include(a => a.Vehicles)
+            .AsNoTracking()
             .FirstOrDefaultAsync();
 
         if (auction == null)

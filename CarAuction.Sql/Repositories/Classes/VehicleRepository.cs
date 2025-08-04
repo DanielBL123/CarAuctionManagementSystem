@@ -1,7 +1,6 @@
 ﻿
 
 using CarAuction.Common.Global.Enum;
-using CarAuction.Model;
 
 namespace CarAuction.Sql.Repositories.Classes;
 
@@ -13,4 +12,12 @@ public class VehicleRepository(CarAuctionSqlDbContext dbContext) : Repository<Ve
 
     public Task<Vehicle?> GetLicitingVehicleByIdentificationNumber(string identificationNumber) =>
             AsQueryable(x => x.IdentificationNumber.Equals(identificationNumber) && x.VehicleAction == VehicleAction.Liciting).FirstOrDefaultAsync();
+
+    public Task<Vehicle?> GetVehicleByIdentificationNumber(string identificationNumber) =>
+            AsQueryable(x => x.IdentificationNumber.Equals(identificationNumber)).FirstOrDefaultAsync();
+
+    public void UpdateRange(IEnumerable<Vehicle> vehicles)
+    {
+        dbContext.UpdateRange(vehicles);
+    }
 }

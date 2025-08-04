@@ -1,6 +1,5 @@
 ﻿using CarAuction.Dto;
 using CarAuction.RealTime.Interface;
-using Microsoft.AspNetCore.SignalR;
 using Newtonsoft.Json;
 using System.Text;
 

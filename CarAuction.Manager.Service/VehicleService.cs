@@ -3,6 +3,7 @@ using CarAuction.Common.Global.Enum;
 using CarAuction.Dto.Request;
 using CarAuction.Manager.Service.Adapter;
 using CarAuction.Model;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Logging;
 
 namespace CarAuction.Manager.Service;
@@ -33,7 +34,7 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAd
 
     public async Task<IEnumerable<VehicleDto>> GetVehiclesAsync(IEnumerable<VehicleType>? types, string? manufacturer, string? model, int? year)
     {
-        var query = vehicleRepository.AsQueryable();
+        var query = vehicleRepository.AsQueryable().AsNoTracking();
 
         if (types != null && types.Any())
             query = query.Where(v => types.Contains(v.VehicleType));

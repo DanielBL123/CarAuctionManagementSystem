@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CarAuction.Sql.Migrations
 {
     [DbContext(typeof(CarAuctionSqlDbContext))]
-    [Migration("20250803023318_db")]
-    partial class db
+    [Migration("20250804170430_dbchanges")]
+    partial class dbchanges
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -48,6 +48,9 @@ namespace CarAuction.Sql.Migrations
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("Name")
+                        .IsUnique();
 
                     b.ToTable("Auction");
                 });
@@ -106,6 +109,9 @@ namespace CarAuction.Sql.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("Username")
+                        .IsUnique();
+
                     b.ToTable("User");
                 });
 
@@ -118,6 +124,9 @@ namespace CarAuction.Sql.Migrations
                     MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
 
                     b.Property<int?>("AuctionId")
+                        .HasColumnType("int");
+
+                    b.Property<int?>("CurrentBidAmount")
                         .HasColumnType("int");
 
                     b.Property<string>("IdentificationNumber")
