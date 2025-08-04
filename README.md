@@ -1,11 +1,12 @@
 # CarAuctionManagementSystem
 
-## Design #### Decisions
+## Design 
+#### Decisions
 ### Unified Vehicle Table with VehicleType Enum
-#### #### Decision:
+#### Decision:
 * Store all vehicle types (Hatchback, Sedan, SUV, Truck) in a single Vehicle table with a VehicleType enum.
 
-#### #### Reasoning:
+#### Reasoning:
 * Reduces schema complexity (no need for multiple inheritance tables).
 * Simplifies querying/searching across all vehicles (e.g., filtering by manufacturer or year regardless of type).
 * Allows adding new vehicle types without schema changes (only extend enum and adjust validation).
