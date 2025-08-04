@@ -33,6 +33,10 @@ public class AutoMapperProfile : Profile
 
 
         CreateMap<Vehicle, VehicleDto>().ReverseMap();
+
+        CreateMap<CreateAuctionRequest, Auction>()
+            .ForMember(dest => dest.StartDate, opt => opt.MapFrom(_ => DateTime.UtcNow));
+
         CreateMap<Auction, AuctionDto>().ReverseMap();
 
         CreateMap<CreateBidRequest, Bid>().ReverseMap();

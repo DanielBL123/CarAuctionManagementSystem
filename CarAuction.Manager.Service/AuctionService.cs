@@ -21,10 +21,8 @@ public class AuctionService(
     {
         logger.LogInformation("Creating a new auction");
 
-        // Map request to entity
         var auction = mapper.Map<Auction>(createAuctionRequest);
 
-        // Fetch vehicles by identifiers
         var vehicles = GetVehiclesByIdentifierNumbers(createAuctionRequest.VehicleIdentificationNumbers);
 
         if (!vehicles.Any())
@@ -33,13 +31,11 @@ public class AuctionService(
         if (vehicles.Any(x => x.AuctionId != null))
             throw new InvalidOperationException("There are vehicles already associated with another auction.");
 
-        // Save auction
         await auctionRepository.AddAsync(auction);
         await auctionRepository.SaveChangesAsync();
 
         logger.LogInformation("Auction created successfully with Id: {Id} || Name: {Name}", auction.Id, auction.Name);
 
-        // Assign vehicles to auction
         foreach (var vehicle in vehicles)
         {
             vehicle.AuctionId = auction.Id;

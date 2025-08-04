@@ -35,7 +35,6 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         var request = new CreateAuctionRequest()
         {
             Name = "LeilaoTeste",
-            StartDateTime = DateTime.UtcNow,
             VehicleIdentificationNumbers = ["V1", "V2"]
         };
             
@@ -76,7 +75,6 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         var request = new CreateAuctionRequest()
         {
             Name = "LeilaoTeste",
-            StartDateTime = DateTime.UtcNow,
             VehicleIdentificationNumbers = ["V1", "V2"]
         };
 
@@ -97,7 +95,6 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         var request = new CreateAuctionRequest()
         {
             Name = "LeilaoTeste",
-            StartDateTime = DateTime.UtcNow,
             VehicleIdentificationNumbers = ["V1", "V2"]
         };
 
