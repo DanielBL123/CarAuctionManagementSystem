@@ -10,6 +10,9 @@ internal class UserConfiguration : IEntityTypeConfiguration<User>
                .IsRequired()
                .HasMaxLength(100);
 
+        builder.HasIndex(v => v.Username)
+               .IsUnique();
+
         builder.Property(u => u.PasswordHash)
                .IsRequired()
                .HasMaxLength(200);

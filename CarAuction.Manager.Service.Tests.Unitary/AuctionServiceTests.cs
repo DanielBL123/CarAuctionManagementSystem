@@ -32,7 +32,13 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
     public async Task CreateAuctionAsync_Should_CreateAuction_With_ValidVehicles()
     {
         // Arrange
-        var request = new CreateAuctionRequest("LeilaoTeste", DateTime.UtcNow, null, ["V1", "V2"]);
+        var request = new CreateAuctionRequest()
+        {
+            Name = "LeilaoTeste",
+            StartDateTime = DateTime.UtcNow,
+            VehicleIdentificationNumbers = ["V1", "V2"]
+        };
+            
 
         var vehicles = new List<Vehicle>
         {
@@ -67,7 +73,12 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
     public async Task CreateAuctionAsync_Should_Throw_When_NoVehiclesFound()
     {
         // Arrange
-        var request = new CreateAuctionRequest("LeilaoTeste", DateTime.UtcNow, null, ["V1", "V2"]);
+        var request = new CreateAuctionRequest()
+        {
+            Name = "LeilaoTeste",
+            StartDateTime = DateTime.UtcNow,
+            VehicleIdentificationNumbers = ["V1", "V2"]
+        };
 
 
         mapperStub.Map<Auction>(request).Returns(new Auction());
@@ -83,7 +94,12 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
     public async Task CreateAuctionAsync_Should_Throw_When_Vehicle_AlreadyAssociated()
     {
         // Arrange
-        var request = new CreateAuctionRequest("LeilaoTeste", DateTime.UtcNow, null, ["V1", "V2"]);
+        var request = new CreateAuctionRequest()
+        {
+            Name = "LeilaoTeste",
+            StartDateTime = DateTime.UtcNow,
+            VehicleIdentificationNumbers = ["V1", "V2"]
+        };
 
         var vehicles = new List<Vehicle>
         {

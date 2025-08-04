@@ -14,7 +14,6 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
         var vehicle = auction.Vehicles.Where(x => x.VehicleAction == VehicleAction.Liciting).First();
 
         var lastBid = bidRepository.AsQueryable(b =>
-                            b.UserId == user.Id &&
                             b.VehicleId == vehicle.Id &&
                             b.AuctionId == auction.Id)
                         .OrderByDescending(b => b.Amount)
@@ -24,7 +23,7 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
 
         if (request.Amount < currentAmmout)
         {
-            logger.LogWarning("The bid placed by {username} for: Auction {request.AuctionName} - Ammount {request.Amount}", username, request.AuctionName, request.Amount);
+            logger.LogWarning("The bid placed by {username} for: Auction {AuctionName} - Ammount {request.Amount}. Current Amount: {Amount}", username, request.AuctionName, request.Amount, lastBid!.Amount);
 
             throw new InvalidOperationException("Your bid is lower than the current highest bid. Please submit a higher amount.");
         }

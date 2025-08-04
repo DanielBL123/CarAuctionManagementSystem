@@ -4,98 +4,117 @@ using CarAuction.Dto.Request;
 using CarAuction.Model;
 using CarAuction.RealTime.Interface;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 
 namespace CarAuction.Manager.Service;
 
-public class AuctionService(IAuctionRepository auctionRepository, IVehicleRepository vehicleRepository, IAuctionNotifier auctionNotifier, IBidRepository bidRepository, IMapper mapper, ILogger<AuctionService> logger) : IAuctionService
+public class AuctionService(
+    IServiceScopeFactory scopeFactory,
+    IAuctionRepository auctionRepository,
+    IVehicleRepository vehicleRepository,
+    IAuctionNotifier auctionNotifier,
+    IMapper mapper,
+    ILogger<AuctionService> logger) : IAuctionService
 {
-
     public async Task<AuctionDto> CreateAuctionAsync(CreateAuctionRequest createAuctionRequest)
     {
         logger.LogInformation("Creating a new auction");
-        
+
+        // Map request to entity
         var auction = mapper.Map<Auction>(createAuctionRequest);
 
+        // Fetch vehicles by identifiers
         var vehicles = GetVehiclesByIdentifierNumbers(createAuctionRequest.VehicleIdentificationNumbers);
 
         if (!vehicles.Any())
-        {
             throw new InvalidOperationException("No vehicles found with the provided identifiers.");
-        }
-
 
         if (vehicles.Any(x => x.AuctionId != null))
-            throw new InvalidOperationException("There are vehicles that are already associated to otherauction.");
+            throw new InvalidOperationException("There are vehicles already associated with another auction.");
 
+        // Save auction
         await auctionRepository.AddAsync(auction);
         await auctionRepository.SaveChangesAsync();
 
-        logger.LogInformation("Auction created successfully with Id: {Id} || Name: {Name}", auction.Id,auction.Name);
+        logger.LogInformation("Auction created successfully with Id: {Id} || Name: {Name}", auction.Id, auction.Name);
 
+        // Assign vehicles to auction
         foreach (var vehicle in vehicles)
         {
             vehicle.AuctionId = auction.Id;
             vehicleRepository.Update(vehicle);
         }
 
-        vehicleRepository.SaveChangesAsync().GetAwaiter().GetResult();
+        await vehicleRepository.SaveChangesAsync();
 
-        var auctionDto = mapper.Map<AuctionDto>(auction);
+        _ = StartAuctionLifecycleAsync(auction.Id);
 
-        _ = StartAuctionLifecycleAsync(auction);
-
-            return auctionDto;
-        
-        
+        return mapper.Map<AuctionDto>(auction);
     }
 
-    private async Task StartAuctionLifecycleAsync(Auction auction)
+    private async Task StartAuctionLifecycleAsync(int auctionId)
     {
-        
-        auctionNotifier.NotifyAuctionCreatedAsync(mapper.Map<AuctionDto>(auction)).GetAwaiter().GetResult();
+        using var scope = scopeFactory.CreateScope();
 
-        logger.LogInformation("Users have been notified about the new auction with Id: {Id} || Name: {Name}", auction.Id, auction.Name);
-  
+        var auctionRepository = scope.ServiceProvider.GetRequiredService<IAuctionRepository>();
+        var vehicleRepository = scope.ServiceProvider.GetRequiredService<IVehicleRepository>();
+        var bidRepository = scope.ServiceProvider.GetRequiredService<IBidRepository>();
+
+        var auction = await auctionRepository
+            .AsQueryable(a => a.Id == auctionId)
+            .Include(a => a.Vehicles)
+            .FirstOrDefaultAsync();
+
+        if (auction == null)
+        {
+            logger.LogWarning("Auction with Id {Id} not found for lifecycle management.", auctionId);
+            return;
+        }
+
+        await auctionNotifier.NotifyAuctionCreatedAsync(mapper.Map<AuctionDto>(auction));
+        logger.LogInformation("Users notified: Auction {Id} || Name: {Name}", auction.Id, auction.Name);
+
         foreach (var vehicle in auction.Vehicles)
         {
             vehicle.VehicleAction = VehicleAction.Liciting;
-            
             vehicleRepository.Update(vehicle);
-            vehicleRepository.SaveChangesAsync().GetAwaiter().GetResult();
-            
+            await vehicleRepository.SaveChangesAsync();
+
             await auctionNotifier.NotifyVehicleOpenAsync(mapper.Map<VehicleDto>(vehicle));
+            logger.LogInformation("Auction live for vehicle {IdentifierNumber}", vehicle.IdentificationNumber);
 
-            logger.LogInformation("Auction is now live for vehicle with Identification Number: {IdentifierNumber}", vehicle.IdentificationNumber);
+            await Task.Delay(TimeSpan.FromSeconds(300));
 
-            await Task.Delay(TimeSpan.FromSeconds(300)); // 5 minutes
-            
             await auctionNotifier.NotifyVehicleClosedAsync(vehicle.Id);
 
             try
             {
-                var bid = await bidRepository.AsQueryable().Where(x => x.Vehicle.IdentificationNumber.Equals(vehicle.IdentificationNumber)).Include(x => x.User).FirstOrDefaultAsync();
+                var winningBid = await bidRepository.AsQueryable()
+                    .Where(x => x.Vehicle.IdentificationNumber == vehicle.IdentificationNumber)
+                    .Include(x => x.User)
+                    .OrderByDescending(x => x.Amount)
+                    .FirstOrDefaultAsync();
 
-                var user = bid!.User;
+                var winner = winningBid?.User;
 
-                logger.LogInformation("Auction has finished for vehicle with Identification Number: {IdentifierNumber}. User {Username} has won the vehicle.", vehicle.IdentificationNumber, user.Username);
+                logger.LogInformation(
+                    "Auction finished for vehicle {IdentifierNumber}. Winner: {Username}",
+                    vehicle.IdentificationNumber,
+                    winner?.Username ?? "None");
 
-                vehicle.VehicleAction = user != null ? VehicleAction.Sold : VehicleAction.None;
-                vehicle.User = user;
-            }catch(Exception ex)
-            {
-                logger.LogError(ex.ToString());
+                vehicle.VehicleAction = winner != null ? VehicleAction.Sold : VehicleAction.None;
+                vehicle.User = winner;
+                vehicleRepository.Update(vehicle);
+                await vehicleRepository.SaveChangesAsync();
             }
-
-            
-            vehicleRepository.Update(vehicle);
-            vehicleRepository.SaveChangesAsync().GetAwaiter().GetResult();
-
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Error determining winner for vehicle {IdentifierNumber}", vehicle.IdentificationNumber);
+            }
         }
 
         await auctionNotifier.NotifyAuctionEndedAsync(auction.Id);
-
-        logger.LogInformation("Auction closed. Id: {Id} | Name: {Name}", auction.Id, auction.Name);
 
         if (auction.Status != AuctionStatus.Closed)
         {
@@ -104,27 +123,25 @@ public class AuctionService(IAuctionRepository auctionRepository, IVehicleReposi
             auctionRepository.Update(auction);
             await auctionRepository.SaveChangesAsync();
         }
-         
+
+        logger.LogInformation("Auction closed. Id: {Id} | Name: {Name}", auction.Id, auction.Name);
     }
 
     private IEnumerable<Vehicle> GetVehiclesByIdentifierNumbers(IEnumerable<string> vehicleIdentifiers) =>
-        [.. vehicleRepository.AsQueryable(x => vehicleIdentifiers.Contains(x.IdentificationNumber))];
-
+        vehicleRepository.AsQueryable(x => vehicleIdentifiers.Contains(x.IdentificationNumber)).ToList();
 
     public async Task<AuctionDto> CloseAuction(CloseAuctionRequest request)
     {
         var auction = await auctionRepository.GetAuctionByName(request.Name);
         ArgumentNullException.ThrowIfNull(auction);
-        
+
         auction.EndDate = DateTime.UtcNow;
         auction.Status = AuctionStatus.Closed;
-
 
         auctionRepository.Update(auction);
         await auctionRepository.SaveChangesAsync();
 
         var vehiclesSold = vehicleRepository.GetVechilesFromAuction(auction.Id);
-
         foreach (var vehicle in vehiclesSold)
         {
             vehicle.IsSold = true;
@@ -136,6 +153,9 @@ public class AuctionService(IAuctionRepository auctionRepository, IVehicleReposi
     }
 
     public async Task<IEnumerable<AuctionDto>> GetActiveAuctions() =>
-         await Task.Run(() => mapper.Map<IEnumerable<AuctionDto>>(auctionRepository.GetAllActiveAuctions().Include(x => x.Vehicles)));
-
+        mapper.Map<IEnumerable<AuctionDto>>(
+            await auctionRepository.GetAllActiveAuctions()
+            .Include(x => x.Vehicles)
+            .ToListAsync());
 }
+

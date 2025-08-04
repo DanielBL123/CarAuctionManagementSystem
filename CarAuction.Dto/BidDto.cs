@@ -6,7 +6,7 @@ public class BidDto
     public int AuctionId { get; set; }
     public int VehicleId { get; set; }
     public int UserId { get; set; }
-    public decimal Amount { get; set; }
+    public int Amount { get; set; }
     public DateTime Timestamp { get; set; }
 }
 
