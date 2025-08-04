@@ -6,6 +6,9 @@ public class TruckValidator : VehicleValidator<CreateTruckRequest>
         ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.LoadCapacity < 0).NotEmpty().WithMessage("Invalid load capacity");
+        RuleFor(x => x.LoadCapacity)
+            .NotEmpty()
+            .GreaterThanOrEqualTo(0)
+            .WithMessage("Invalid load capacity");
     }
 }

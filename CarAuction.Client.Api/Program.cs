@@ -126,6 +126,16 @@ builder.Services.AddCors(options =>
                   .AllowAnyMethod()
                   .AllowAnyHeader();
         });
+
+    options.AddPolicy("AllowSignalR",
+        policy =>
+        {
+            policy.WithOrigins("http://localhost:5175", "https://localhost:7295")
+                  .AllowAnyHeader()
+                  .AllowAnyMethod()
+                  .AllowCredentials();
+        });
+
 });
 
 var app = builder.Build();
@@ -137,10 +147,11 @@ if (app.Environment.IsDevelopment())
     app.UseSwaggerUI();
 }
 
-app.MapHub<AuctionHub>("/auctionHub");
+app.UseCors("AllowAll");
+app.MapHub<AuctionHub>("/auctionHub").RequireCors("AllowSignalR");
 
 app.UseHttpsRedirection();
-app.UseCors("AllowAll");
+
 app.UseAuthentication();
 app.UseAuthorization();
 

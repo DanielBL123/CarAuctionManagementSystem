@@ -6,7 +6,9 @@ public class SuvValidator : VehicleValidator<CreateSuvRequest>
         ClassLevelCascadeMode = CascadeMode.Stop;
         RuleLevelCascadeMode = CascadeMode.Stop;
 
-        RuleFor(x => x.NumberOfSeats < 5 || x.NumberOfSeats > 9).NotEmpty().WithMessage("Invalid number of seats");
+        RuleFor(x => x.NumberOfSeats)
+            .NotEmpty().WithMessage("Number of seats cannot be empty")
+            .InclusiveBetween(5, 9).WithMessage("Invalid number of seats. Must be between 5 and 9");
 
     }
 }

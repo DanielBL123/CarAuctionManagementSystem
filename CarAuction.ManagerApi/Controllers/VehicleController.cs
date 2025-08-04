@@ -22,29 +22,32 @@ public class VehiclesController(IVehicleService vehicleService) : ControllerBase
 
     [HttpPost("hatchback")]
     public async Task<IActionResult> AddHatchback([FromBody] CreateHatchbackRequest hatchback)
+        => await HandleAddVehicle(hatchback);
+
+    [HttpPost("sedan")]
+    public async Task<IActionResult> AddSedan([FromBody] CreateSedanRequest sedan)
+        => await HandleAddVehicle(sedan);
+
+    [HttpPost("suv")]
+    public async Task<IActionResult> AddSuv([FromBody] CreateSuvRequest suv)
+        => await HandleAddVehicle(suv);
+
+    [HttpPost("truck")]
+    public async Task<IActionResult> AddTruck([FromBody] CreateTruckRequest truck)
+        => await HandleAddVehicle(truck);
+
+    private async Task<IActionResult> HandleAddVehicle<T>(T request) where T : CreateVehicleRequest
     {
         try
         {
-            return Ok(await vehicleService.AddVehicle(hatchback));
+            var result = await vehicleService.AddVehicle(request);
+            return Ok(result);
         }
         catch (Exception ex)
         {
             return BadRequest(ex.Message);
         }
     }
-
-    [HttpPost("sedan")]
-    public async Task<IActionResult> AddSedan([FromBody] CreateSedanRequest sedan) =>
-        Ok(await vehicleService.AddVehicle(sedan));
-
-    [HttpPost("suv")]
-    public async Task<IActionResult> AddSuv([FromBody] CreateSuvRequest suv) =>
-        Ok(await vehicleService.AddVehicle(suv));
-
-
-    [HttpPost("truck")]
-    public async Task<IActionResult> AddTruck([FromBody] CreateTruckRequest truck) =>
-        Ok(await vehicleService.AddVehicle(truck));
 
 
 

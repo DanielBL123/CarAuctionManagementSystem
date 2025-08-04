@@ -3,11 +3,11 @@ using CarAuction.Common.Global.Enum;
 using CarAuction.Dto.Request;
 using CarAuction.Manager.Service.Adapter;
 using CarAuction.Model;
-using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Logging;
 
 namespace CarAuction.Manager.Service;
 
-public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAdapterFactory vehicleTypeAdapterFactory, IMapper mapper) : IVehicleService
+public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAdapterFactory vehicleTypeAdapterFactory, IMapper mapper, ILogger<VehicleService> logger) : IVehicleService
 {
     public async Task<CreateVehicleRequest> AddVehicle(CreateVehicleRequest createVehicleRequest)
     {
@@ -26,6 +26,7 @@ public class VehicleService(IVehicleRepository vehicleRepository, IVehicleTypeAd
             return createVehicleRequest;
         }
 
+        logger.LogError(string.Join(",", Errors.ToArray()));
         throw new InvalidOperationException(string.Join(",", Errors.ToArray()));
   
     }

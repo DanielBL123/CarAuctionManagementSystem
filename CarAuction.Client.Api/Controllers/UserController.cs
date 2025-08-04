@@ -18,28 +18,35 @@ namespace CarAuction.Client.Api.Controllers
         [HttpPost("login")]
         public async Task<IActionResult> Login(LoginUserRequest request)
         {
-            var user = await authService.LoginAsync(request);
-            if (user == null)
-                return NotFound(new { message = "User not found or password incorrect" });
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var key = Encoding.UTF8.GetBytes("MyDevelopmentSecretKeyCodingTestAuctionClientSide12345");
-
-            var tokenDescriptor = new SecurityTokenDescriptor
+            try
             {
-                Subject = new ClaimsIdentity(
-                [
-            new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
+                var user = await authService.LoginAsync(request);
+                if (user == null)
+                    return NotFound(new { message = "User not found or password incorrect" });
+
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.UTF8.GetBytes("MyDevelopmentSecretKeyCodingTestAuctionClientSide12345");
+
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(
+                    [
+                new Claim(ClaimTypes.NameIdentifier, user.Id.ToString()),
             new Claim(ClaimTypes.Name, user.Username)
-        ]),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+            ]),
+                    Expires = DateTime.UtcNow.AddHours(2),
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
-            var jwtToken = tokenHandler.WriteToken(token);
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                var jwtToken = tokenHandler.WriteToken(token);
 
-            return Ok(new { token = jwtToken });
+                return Ok(new { token = jwtToken });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
 
         [HttpPost("register")]
@@ -60,17 +67,33 @@ namespace CarAuction.Client.Api.Controllers
         [HttpPost("bid")]
         public async Task<IActionResult> PlaceBid([FromBody] CreateBidRequest createBidRequest)
         {
-            var username = User.FindFirstValue(ClaimTypes.Name)!;
-            await bidService.PlaceBid(createBidRequest, username);
-            return Ok(null);
+            try
+            {
+                var username = User.FindFirstValue(ClaimTypes.Name)!;
+                await bidService.PlaceBid(createBidRequest, username);
+                return Ok("Bid placed successfully");
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
 
         [Authorize]
         [HttpGet("vehicles")]
         public async Task<IActionResult> GetVehiclesFromUser()
         {
-            var username = User.FindFirstValue(ClaimTypes.Name)!;
-            return Ok(await authService.GetVehicles(username));
+            try
+            {
+                var username = User.FindFirstValue(ClaimTypes.Name)!;
+                return Ok(await authService.GetVehicles(username));
+            }
+            catch(Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
+            
         }
     }
 }

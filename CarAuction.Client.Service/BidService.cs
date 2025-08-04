@@ -11,7 +11,7 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
 
         var user = await GetUserOrThrow(username);
         var auction = await GetAuctionOrThrow(request.AuctionName);
-        var vehicle = await GetVehicleOrThrow(request.VehicleUniqueIdentifier);
+        var vehicle = auction.Vehicles.Where(x => x.VehicleAction == VehicleAction.Liciting).First();
 
         var lastBid = bidRepository.AsQueryable(b =>
                             b.UserId == user.Id &&
@@ -53,11 +53,8 @@ public class BidService(IUserRepository userRepository, IAuctionRepository aucti
 
     private async Task<Auction> GetAuctionOrThrow(string name)
         => await Task.Run(() => auctionRepository.AsQueryable(a => a.Name == name && a.Status == AuctionStatus.Active)
-               .FirstOrDefault())
+                                    .Include(x => x.Vehicles)
+                                    .FirstOrDefault())
            ?? throw new InvalidOperationException($"No active auction found with name '{name}'.");
-
-    private async Task<Vehicle> GetVehicleOrThrow(string identifier)
-        => await vehicleRepository.GetLicitingVehicleByIdentificationNumber(identifier)
-           ?? throw new InvalidOperationException($"Vehicle with identifier '{identifier}' not found.");
 
 }

@@ -2,6 +2,5 @@
 
 public record CreateBidRequest(
     string AuctionName,
-    string VehicleUniqueIdentifier,
     int Amount
 );

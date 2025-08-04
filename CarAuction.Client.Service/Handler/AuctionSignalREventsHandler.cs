@@ -28,7 +28,11 @@ public static class AuctionSignalREventsHandler
             Console.WriteLine($"[AUCTION ENDED] Auction {auctionId} has ended.");
         });
 
-        connection.StartAsync();
+        connection.On<BidDto>("BidPlaced", (bid) =>
+        {
+            Console.WriteLine($"[BID EVENT] : We have a new bid: {bid.Amount}!");
+        });
+
     }
 
 }

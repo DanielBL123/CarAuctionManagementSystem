@@ -25,4 +25,9 @@ public class SignalRAuctionNotifier : IAuctionNotifier
 
     public async Task NotifyAuctionEndedAsync(int auctionId) =>
         await _hubContext.Clients.All.SendAsync("AuctionEnded", auctionId);
+
+    public async Task NotifyBidPlacedAsync(BidDto bid)
+    {
+        await _hubContext.Clients.All.SendAsync("BidPlaced", bid);
+    }
 }

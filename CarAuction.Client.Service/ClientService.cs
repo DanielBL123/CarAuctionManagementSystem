@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Connections;
+﻿using CarAuction.Client.Service.Handler;
+using Microsoft.AspNetCore.Connections;
 using Microsoft.AspNetCore.SignalR.Client;
 using Microsoft.Extensions.Options;
 
@@ -33,8 +34,8 @@ public class ClientService(IAuthService authService, IOptions<AuctionNotificatio
 
             } while (isLogged == false);
 
-            ConnectToHub(stoppingToken).GetAwaiter().GetResult();
-
+            await ConnectToHub();
+            
         }
         catch (InvalidOperationException ex)
         {
@@ -94,36 +95,50 @@ public class ClientService(IAuthService authService, IOptions<AuctionNotificatio
 
     private async Task RegisterUser(string username, string password) =>
         await authService.RegisterAsync(new RegisterUserRequest(username, password));
-  
 
-    private async Task ConnectToHub(CancellationToken stoppingToken)
+
+    private async Task ConnectToHub()
     {
         var connection = new HubConnectionBuilder()
                 .WithUrl(AuctionNotificationSettings.HubUrl)
                 .Build();
 
+        AuctionSignalREventsHandler.RegisterSignalREventsFromAuctions(connection);
+        await connection.StartAsync();
 
-        int retries = 0;
-        while (!stoppingToken.IsCancellationRequested)
-        {
-            try
-            {
-                await connection.StartAsync(stoppingToken);
-                logger.LogInformation("Connected to SignalR Hub at {HubUrl}", AuctionNotificationSettings.HubUrl);
-                break;
-            }
-            catch (Exception ex)
-            {
-                retries++;
-                logger.LogWarning(ex, "Failed to connect to Hub. Attempt {Retry}/{MaxRetries}", retries, AuctionNotificationSettings.RetryCount);
+        logger.LogInformation("Connected to SignalR Hub at {HubUrl}", AuctionNotificationSettings.HubUrl);
 
-                if (retries >= AuctionNotificationSettings.RetryCount)
-                {
-                    throw new ConnectionAbortedException("Maximum retry attempts reached. We couldn't connect you to the HUB");
-                }
+    } 
 
-                await Task.Delay(TimeSpan.FromSeconds(AuctionNotificationSettings.RetryDelaySeconds), stoppingToken);
-            }
-        }
-    }
+        //var connection = new HubConnectionBuilder()
+        //       .WithUrl("http://localhost:5158/auctionHub")
+        //       .Build();
+
+        //AuctionSignalREventsHandler.RegisterSignalREventsFromAuctions(connection);
+
+
+
+        //int retries = 0;
+        //try
+        //{
+
+
+        //await connection.StartAsync(stoppingToken);
+
+
+        //}
+        //catch (Exception ex)
+        //{
+        //    //retries++;
+        //    logger.LogWarning(ex, "Failed to connect to Hub. Attempt {Retry}/{MaxRetries}", retries,AuctionNotificationSettings.RetryCount);
+
+        //    //if (retries >= AuctionNotificationSettings.RetryCount)
+        //    //{
+        //    //    throw new ConnectionAbortedException("Maximum retry attempts reached. We couldn't connectyou o the HUB");
+        //    //}
+
+        //    //await Task.Delay(TimeSpan.FromSecondsAuctionNotificationSettings.RetryDelaySeconds),stoppingToken);
+        //}
+
+    
 }
