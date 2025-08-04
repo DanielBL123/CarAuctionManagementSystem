@@ -86,6 +86,14 @@ Simplifies winner determination (highest bid per vehicle at auction close).
 * Useful for debugging and operational monitoring.
 
 
+### Assumptions
+#### Single-Vehicle Bidding:
+
+* Bidding in auctions is handled one vehicle at a time. Each vehicle is presented to participants sequentially.
+* Time Limit Per Vehicle: each vehicle remains open for bidding for 5 minutes. After this time, the highest bid is evaluated, and the vehicle is either marked as Sold (if there is a winning bid) or remains Unsold.
+* Sequential Auction Flow: Once bidding ends for one vehicle, the next vehicle in the auction is presented automatically until all vehicles have been processed.
+
+
 ## Test guide
 
 1. Setup
