@@ -1,12 +1,11 @@
 # CarAuctionManagementSystem
 
-## Design 
-#### Decisions
+## Design #### Decisions
 ### Unified Vehicle Table with VehicleType Enum
-#### Decision:
+#### #### Decision:
 * Store all vehicle types (Hatchback, Sedan, SUV, Truck) in a single Vehicle table with a VehicleType enum.
 
-#### Reasoning:
+#### #### Reasoning:
 * Reduces schema complexity (no need for multiple inheritance tables).
 * Simplifies querying/searching across all vehicles (e.g., filtering by manufacturer or year regardless of type).
 * Allows adding new vehicle types without schema changes (only extend enum and adjust validation).
@@ -104,23 +103,66 @@ Simplifies winner determination (highest bid per vehicle at auction close).
 
 2. Create Vehicles (Manager API)
 
+- Create Hatchback
+
 ```json
 {
-  "year": 2022,
+  "year": 2020,
   "startingBid": 10000,
-  "manufacturer": "Toyota",
-  "model": "Corolla",
-  "identificationNumber": "ABC123456789",
+  "manufacturer": "Mercedes",
+  "model": "Hatchback",
+  "identificationNumber": "123456",
   "numberOfDoors": 5
 }
 ```
 
-3. Create an Auction (Manager API) - for each vehicle added to the auction, it will have 5 minutes to be licited
+- Create Sedan
+
+```json
+{
+  "year": 2020,
+  "startingBid": 15000,
+  "manufacturer": "Mercedes",
+  "model": "Sedan",
+  "identificationNumber": "123457",
+  "numberOfDoors": 5
+}
+```
+
+- Create Suv
+
+```json
+{
+  "year": 2022,
+  "startingBid": 20000,
+  "manufacturer": "Mercedes",
+  "model": "Suv",
+  "identificationNumber": "124568",
+  "numberOfSeats": 5
+}
+```
+
+- Create Truck
+
+```json
+{
+  "year": 2023,
+  "startingBid": 30000,
+  "manufacturer": "Mercedes",
+  "model": "Truck",
+  "identificationNumber": "124569",
+  "loadCapacity": 1000
+}
+```
+
+3. Get Vehicles (without and with filters)
+
+4. Create an Auction (Manager API) - 4 vehicles
 
 ```json
 {
   "name": "Auction1",
-  "vehicleIdentificationNumbers": ["ABC123456789"]
+  "vehicleIdentificationNumbers": ["123456", "123457", "124568", "124569"]
 }
 ```
 
