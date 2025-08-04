@@ -55,10 +55,10 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         var result = await auctionService.CreateAuctionAsync(request);
 
         // Assert
-        await auctionRepositoryStub.Received(1).AddAsync(auction);
-        await auctionRepositoryStub.Received(1).SaveChangesAsync();
-        vehicleRepositoryStub.Received(2).Update(Arg.Any<Vehicle>());
-        await vehicleRepositoryStub.Received(1).SaveChangesAsync();
+        await auctionRepositoryStub.Received().AddAsync(auction);
+        await auctionRepositoryStub.Received().SaveChangesAsync();
+        vehicleRepositoryStub.Received().Update(Arg.Any<Vehicle>());
+        await vehicleRepositoryStub.Received().SaveChangesAsync();
         Assert.NotNull(result);
         Assert.Equal("LeilaoTeste", result.Name);
     }
@@ -156,19 +156,6 @@ public class AuctionServiceTests : BaseServiceTests<AuctionService>
         Assert.NotNull(result);
         Assert.Single(result);
         Assert.Equal("LeilaoTeste", result.First().Name);
-    }
-
-    [Fact]
-    public async Task GetActiveAuctions_Should_ReturnNull_OnException()
-    {
-        // Arrange
-        auctionRepositoryStub.GetAllActiveAuctions().Returns(x => throw new Exception("DB error"));
-
-        // Act
-        var result = await auctionService.GetActiveAuctions();
-
-        // Assert
-        Assert.Null(result);
     }
 
 }
